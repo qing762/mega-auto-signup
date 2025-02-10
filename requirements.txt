@@ -1,0 +1,7 @@
+chartio==6.0.1
+DrissionPage==4.1.0.17
+Requests==2.32.3
+tqdm==4.66.3
+pyinstaller==6.11.0
+rich==13.8.0
+toml==0.10.2
