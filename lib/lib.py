@@ -33,6 +33,13 @@ class Main:
             print(f"An error occurred: {e}")
             pass
 
+    def testProxy(self, proxy):
+        try:
+            response = requests.get("http://www.google.com", proxies={"http": proxy, "https": proxy}, timeout=5)
+            return True, response.status_code
+        except Exception:
+            return False, "Proxy test failed! Please ensure that the proxy is working correctly. Skipping proxy usage..."
+
 
 if __name__ == "__main__":
     print("This is a library file. Please run main.py instead.")
