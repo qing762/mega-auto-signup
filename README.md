@@ -13,9 +13,11 @@ The process begins by utilizing the [Mails.org](https://mails.org/) service to o
 ## Features
 
 - Able to use any Chromium-based browser.
+- Able to use non authenticated proxy.
 - Be able to prompt to change to your own password instead of using the default one.
 - Password complexity checker for custom password.
 - Error handling.
+- Update checker functionality.
 - The script does all the job by itself.
 - No webdriver required.
 - Fast execution time.
@@ -29,23 +31,13 @@ The process begins by utilizing the [Mails.org](https://mails.org/) service to o
 - The account details should be generated at the `accounts.txt` file under the same directory.
 
 #### 2. Python file method:
- - First, clone this repository:
- ```shell
- git clone https://github.com/qing762/mega-auto-signup/
+ - First, ensure that Python is installed:
+ ``` shell
+ https://www.python.org/downloads/
  ```
- - Install [Google Chrome](https://google.com/chrome/) (IMPORTANT!)
+ - Run the following command:
  ```shell
- INSTALL HERE: https://google.com/chrome/
- ```
-
- - Install the necessary dependencies:
- ```shell
- pip install -r requirements.txt
- ```
-
- - Finally, run the Python file:
- ```shell
- python main.py
+ git clone https://github.com/qing762/mega-auto-signup/ && cd mega-auto-signup && pip install -r requirements.txt && python main.py
  ```
 
  - And you're all set! Follow the instructions while interacting with the Python file.

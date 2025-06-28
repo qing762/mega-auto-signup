@@ -1,8 +1,8 @@
 import asyncio
 import re
 import warnings
-import time
 import os
+from datetime import datetime
 from tqdm import TqdmExperimentalWarning
 from tqdm.rich import tqdm
 from DrissionPage import Chromium, ChromiumOptions
@@ -144,7 +144,7 @@ async def main():
                     chrome.clear_cache()
                     chrome.quit()
 
-                    accounts.append({"email": email, "password": passw})
+                    accounts.append({"email": email, "password": passw, "emailPassword": emailPassword})
 
                     bar.set_description(f"Done [{x + 1}/{executionCount}]")
                     bar.update(1)
@@ -161,15 +161,14 @@ async def main():
 
     with open("accounts.txt", "a") as f:
         for account in accounts:
-            timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             f.write(
-                f"Email: {account['email']}, Password: {account['password']}, (Created at {timestamp})\n"
+                f"Email: {account['email']}, Password: {account['password']}, Email Password: {account['emailPassword']} (Created at {timestamp})\n"
             )
-
     print("\033[1m" "Credentials:")
 
     for account in accounts:
-        print(f"Email: {account['email']}, Password: {account['password']}")
+        print(f"Email: {account['email']}, Password: {account['password']}, Email Password: {account['emailPassword']}")
     print("\033[0m" "\nCredentials saved to accounts.txt\nHave fun using Mega!")
 
 if __name__ == "__main__":
