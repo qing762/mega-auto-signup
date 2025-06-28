@@ -1,5 +1,9 @@
 import requests
 import sys
+import time
+import random
+from pymailtm import MailTm, Account
+from pymailtm.pymailtm import generate_username
 
 
 class Main:
@@ -39,6 +43,44 @@ class Main:
             return True, response.status_code
         except Exception:
             return False, "Proxy test failed! Please ensure that the proxy is working correctly. Skipping proxy usage..."
+
+    def generateEmail(self, password="Qing762.chy"):
+        if not hasattr(self, 'mailtm'):
+            self.mailtm = MailTm()
+        domainList = self.mailtm._get_domains_list()
+        domain = random.choice(domainList)
+        username = generate_username(1)[0].lower()
+        address = f"{username}@{domain}"
+        while True:
+            try:
+                emailID = requests.post("https://api.mail.tm/accounts", json={"address": address, "password": password})
+                if emailID.status_code == 201 and "id" in emailID.json():
+                    break
+                else:
+                    print(f"Failed to create email with address {address}. Sleeping for 5 seconds then will retry...")
+                    time.sleep(5)
+                    username = generate_username(1)[0].lower()
+                    address = f"{username}@{domain}"
+            except Exception as e:
+                print(f"Error creating email: {e}. Sleeping for 5 seconds then will retry...")
+                time.sleep(5)
+                username = generate_username(1)[0].lower()
+                address = f"{username}@{domain}"
+        token = requests.post(
+            "https://api.mail.tm/token",
+            json={"address": address, "password": password}
+        ).json()["token"]
+        return address, password, token, emailID
+
+    def fetchVerification(self, address=None, password=None, emailID=None):
+        if not address or not password or not emailID:
+            raise ValueError("Address, password, and emailID must be provided.")
+        if not hasattr(self, 'mailtm'):
+            self.mailtm = MailTm()
+        if not hasattr(self, 'account'):
+            self.account = Account(emailID, address, password)
+        messages = self.account.get_messages()
+        return messages
 
 
 if __name__ == "__main__":

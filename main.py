@@ -91,70 +91,55 @@ async def main():
         bar.set_description(f"Initial setup completed [{x + 1}/{executionCount}]")
         bar.update(20)
         chrome = Chromium(addr_or_opts=co)
-        page = chrome.get_tab(id_or_num=1)
-        page.listen.start("https://mails.org", method="POST")
-        page.get("https://mails.org")
-
-        for _ in range(10):
-            result = page.listen.wait()
-            if result.url == "https://mails.org/api/email/generate":
-                email = result.response.body["message"]
-                break
-
-        if not email:
-            print("Failed to generate email. Exiting...")
-            continue
+        page = chrome.latest_tab
+        email, emailPassword, token, emailID = lib.generateEmail(passw)
+        bar.set_description(f"Generated email [{x + 1}/{executionCount}]")
+        bar.update(10)
 
         bar.set_description(f"Account generation process [{x + 1}/{executionCount}]")
         bar.update(20)
 
-        tab = chrome.new_tab("https://mega.nz/register")
-
-        tab.ele("#register-firstname-registerpage2").input("qing")
-        tab.ele("#register-lastname-registerpage2").input("chy")
-        tab.ele("#register-email-registerpage2").input(email)
-        tab.run_js_loaded(f'document.getElementById("register-password-registerpage2").value = "{passw}";')
-        tab.run_js_loaded(f'document.getElementById("register-password-registerpage3").value = "{passw}";')
+        page.get("https://mega.nz/register")
+        page.ele("#register-firstname-registerpage2").input("qing")
+        page.ele("#register-lastname-registerpage2").input("chy")
+        page.ele("#register-email-registerpage2").input(email)
+        page.run_js_loaded(f'document.getElementById("register-password-registerpage2").value = "{passw}";')
+        page.run_js_loaded(f'document.getElementById("register-password-registerpage3").value = "{passw}";')
         page.listen.start("https://mails.org", method="POST")
-        tab.ele('xpath://*[@id="register_form"]/div[8]/div[1]/input').click()
-        tab.ele('xpath://*[@id="register-check-registerpage2"]').click()
-        tab.ele('xpath://*[@id="register_form"]/button').click()
+        page.ele('xpath://*[@id="register_form"]/div[1]/div[8]/div[1]/input').click()
+        page.ele('xpath://*[@id="register-check-registerpage2"]').click()
+        page.ele('xpath://*[@id="register_form"]/div[1]/button').click()
 
         bar.set_description(f"Signup process [{x + 1}/{executionCount}]")
         bar.update(30)
 
-        if tab.ele('xpath://*[@id="bodyel"]/section[5]/div[14]/section/div/div[2]/div[1]', timeout=60):
+        if page.ele('xpath://*[@id="bodyel"]/section[5]/div[14]/section/div/div[2]/div[1]', timeout=60):
             link = None
-            for _ in range(10):
-                result = page.listen.wait()
-                content = result.response.body["emails"]
-                if not content:
-                    continue
-                for y in content.items():
-                    if y[1]["subject"] == "MEGA email verification required":
-                        links = re.findall(
-                            r"https://mega.nz/#confirm[^\s]+", y[1]["body"]
-                        )
-                        if links:
-                            link = links[0]
-                            break
-                    if link:
-                        break
-                if link:
+            while True:
+                messages = lib.fetchVerification(email, emailPassword, emailID)
+                if len(messages) > 0:
                     break
+            msg = messages[0]
+            body = getattr(msg, 'text', None)
+            if not body and hasattr(msg, 'html') and msg.html:
+                body = msg.html[0]
+            if body:
+                match = re.search(r'https://mega.nz/#confirm[^\s]+', body)
+                if match:
+                    link = match.group(0)
             if link:
                 bar.set_description(
                     f"Verifying email address [{x + 1}/{executionCount}]"
                 )
-                bar.update(20)
-                tab.get(link.replace("#", "").replace('"', ""))
-                tab.ele("#login-password2").input(passw)
-                tab.ele('.mega-button positive login-button large right').click()
-                if tab.ele('.pricing-pg pro-plans-cards-container tab-ctrl-ind card-container', timeout=60):
+                bar.update(10)
+                page.get(link.replace("#", "").replace('"', ""))
+                page.ele("#login-password2").input(passw)
+                page.ele('.mega-button positive login-button large right').click()
+                if page.ele('xpath://*[@id="startholder"]/div[2]/div/div[2]/div[4]', timeout=60):
                     bar.set_description("Clearing cache and data")
                     bar.update(9)
-                    tab.set.cookies.clear()
-                    tab.clear_cache()
+                    page.set.cookies.clear()
+                    page.clear_cache()
                     chrome.set.cookies.clear()
                     chrome.clear_cache()
                     chrome.quit()
