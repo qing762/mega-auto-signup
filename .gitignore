@@ -10,3 +10,6 @@ dist/
 assignVer.py
 *.spec
 version.py
+refactor.py
+accounts_reformatted.txt
+*.txt

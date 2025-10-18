@@ -135,6 +135,8 @@ async def main():
                 page.get(link.replace("#", "").replace('"', ""))
                 page.ele("#login-password2").input(passw)
                 page.ele('.mega-button positive login-button large right').click()
+                page.ele('.mega-component secondary nav-elem normal button').click()
+                page.ele('.mega-component thin nav-elem normal button').click()
                 if page.ele('xpath://*[@id="startholder"]/div[2]/div/div[2]/div[4]', timeout=60):
                     bar.set_description("Clearing cache and data")
                     bar.update(9)
